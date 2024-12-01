@@ -9,9 +9,7 @@ global parse_arithmetic
 align 16
 parse_arithmetic:
 ;save the stack
-push rbp             
-mov rbp, rsp 
-
+mov r10, rsp
 push 0;terminate the op stack 
 
 number_mode:
@@ -133,9 +131,7 @@ mov rax, rdi
 ;jmp wrap_up
 
 wrap_up:
-;handle end of parse
-lea rsp, [rbx-8] ;go back so we can pop rbx	
-pop rbx
+mov rsp, r10
 ret
 
 exit_error:
