@@ -1,6 +1,6 @@
 CC = zig cc
 NASM = nasm
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g3 -gdwarf
 ASMFLAGS_LINUX = -f elf64
 ASMFLAGS_WINDOWS = -f win64
 

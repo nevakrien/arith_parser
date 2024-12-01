@@ -5,6 +5,8 @@
 ; rdx: data (result.data)
 section .text
 global parse_arithmetic
+
+align 16
 parse_arithmetic:
 ;save the stack
 push rbp             
@@ -104,7 +106,7 @@ jmp op_loop
 
 case_minus:
 ;r9 var-r9
-mov r9, rcx
+mov rcx,r9 
 pop r9
 sub r9, rcx
 jmp op_loop
@@ -132,7 +134,7 @@ mov rax, rdi
 
 wrap_up:
 ;handle end of parse
-mov rsp, rbx	
+lea rsp, [rbx-8] ;go back so we can pop rbx	
 pop rbx
 ret
 
