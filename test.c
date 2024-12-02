@@ -2,9 +2,15 @@
 #include <stdint.h>
 #include "parser_arith.h"
 
+#ifndef _WIN32
 #define RESET  "\x1b[0m"
 #define RED    "\x1b[31m"
 #define GREEN  "\x1b[32m"
+#else
+#define RESET  ""
+#define RED    ""
+#define GREEN  ""
+#endif
 
 
 void test_parse_arithmetic(const char* input, int64_t expected, int should_succeed) {
