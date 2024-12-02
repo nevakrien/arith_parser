@@ -14,13 +14,13 @@ push 0;terminate the op stack
 
 number_mode:
 mov r8, 1 ;sign
-test byte [rdi], ' ' ;skip spaces
-jnz maybe_neg
+cmp byte [rdi], ' ' ;skip spaces
+jne maybe_neg
 inc rdi 
 jmp number_mode
 
 maybe_neg:
-test byte [rdi], '-'
+cmp byte [rdi], '-'
 jne first_digit
 mov r8, -1
 inc rdi 
@@ -29,13 +29,14 @@ first_digit:
 movzx rdx, byte [rdi] 
 sub rdx, '0' ;try converting asci/utf8 to digit value
 
-cmp rdx, rdx
+cmp rdx, 0
 jb exit_error
 cmp rdx, 9
 ja exit_error
 
-gather_digits:
 inc rdi
+
+gather_digits:
 movzx rax, byte [rdi] 
 sub rax,'0' ;try converting asci/utf8 to digit value
 
@@ -49,17 +50,17 @@ lea rax, [rax +2*rdx]
 shl rdx, 3
 lea rdx, [rax + rdx]
 
+inc rdi
 jmp gather_digits
 
 end_number:
 imul rdx, r8;add sign information
 push rdx ;done parsing the curent number
 
-inc rdi
 
 operator_mode:
-test byte [rdi], ' ' ;skip spaces
-jnz test_op
+cmp byte [rdi], ' ' ;skip spaces
+jne test_op
 inc rdi 
 jmp operator_mode
 
@@ -70,13 +71,13 @@ inc rdi
 jmp number_mode
 
 test_op:
-test byte [rdi], '-'
+cmp byte [rdi], '-'
 je push_op
-test byte [rdi], '+'
+cmp byte [rdi], '+'
 je push_op
-test byte [rdi], '*'
+cmp byte [rdi], '*'
 je push_op
-test byte [rdi], '/'
+cmp byte [rdi], '/'
 je push_op
 
 ; jmp done_reading_input
@@ -86,13 +87,13 @@ pop r9
 
 op_loop:
 pop r8 ;op
-test r8, '+'
+cmp r8, '+'
 je case_plus
-test r8, '-'
+cmp r8, '-'
 je case_minus
-test r8, '*'
+cmp r8, '*'
 je case_mul
-test r8, '/'
+cmp r8, '/'
 je case_div
 ;terminator case
 jmp return_good

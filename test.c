@@ -21,6 +21,8 @@ int main() {
     printf("hello worlds\n");
 
     // // Arithmetic test cases
+    test_parse_arithmetic("23", 23, "");
+    test_parse_arithmetic("-3", -3, "");
     test_parse_arithmetic("2+3", 5, "");            // Simple addition
     test_parse_arithmetic("10-4", 6, "");           // Simple subtraction
     test_parse_arithmetic("7*6", 42, "");           // Multiplication
