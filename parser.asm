@@ -60,7 +60,7 @@ end_number:
 imul r9, r8;add sign information
 cmp r10, '*'
 je early_mul
-cmp r10, '\'
+cmp r10, '/'
 je early_div
 
 push r9 ;done parsing the curent number
@@ -73,11 +73,13 @@ push rax
 jmp operator_mode
 
 early_div:
-xor rdx, rdx;prepare for div call
-pop rax
-idiv r9
-push rax
-jmp operator_mode
+xor rdx, rdx       
+pop rax            
+test r9, r9       
+jz exit_error      
+idiv r9            
+push rax           
+jmp operator_mode  
 
 operator_mode:
 cmp byte [rdi], ' ' ;skip spaces
