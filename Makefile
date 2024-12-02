@@ -1,8 +1,8 @@
 CC = zig cc
 NASM = nasm
 CFLAGS = -Wall -g3 -gdwarf
-ASMFLAGS_LINUX = -f elf64
-ASMFLAGS_WINDOWS = -f win64 
+ASMFLAGS_LINUX = -f elf64 -g
+ASMFLAGS_WINDOWS = -f win64 -g
 
 # Determine OS-specific settings
 ifeq ($(OS), Windows_NT)

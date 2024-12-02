@@ -9,8 +9,11 @@ global parse_arithmetic
 align 16
 parse_arithmetic:
 ;save the stack
-mov r10, rsp
+push rbp
+mov rbp,rsp
 push 0;terminate the op stack 
+mov r10, 0
+
 
 number_mode:
 mov r8, 1 ;sign
@@ -26,12 +29,12 @@ mov r8, -1
 inc rdi 
 
 first_digit: 
-movzx rdx, byte [rdi] 
-sub rdx, '0' ;try converting asci/utf8 to digit value
+movzx r9, byte [rdi] 
+sub r9, '0' ;try converting asci/utf8 to digit value
 
-cmp rdx, 0
+cmp r9, 0
 jb exit_error
-cmp rdx, 9
+cmp r9, 9
 ja exit_error
 
 inc rdi
@@ -45,18 +48,36 @@ jb end_number
 cmp rax,9
 ja end_number
 
-;rdx = 10rdx + rax (rax = garbage)
-lea rax, [rax +2*rdx]
-shl rdx, 3
-lea rdx, [rax + rdx]
+;r9 = 10r9 + rax (rax = garbage)
+lea rax, [rax +2*r9]
+shl r9, 3
+lea r9, [rax + r9]
 
 inc rdi
 jmp gather_digits
 
 end_number:
-imul rdx, r8;add sign information
-push rdx ;done parsing the curent number
+imul r9, r8;add sign information
+cmp r10, '*'
+je early_mul
+cmp r10, '\'
+je early_div
 
+push r9 ;done parsing the curent number
+jmp operator_mode
+
+early_mul:
+pop rax
+imul r9
+push rax
+jmp operator_mode
+
+early_div:
+xor rdx, rdx;prepare for div call
+pop rax
+idiv r9
+push rax
+jmp operator_mode
 
 operator_mode:
 cmp byte [rdi], ' ' ;skip spaces
@@ -68,6 +89,12 @@ push_op:
 movzx rax, byte[rdi]
 push rax
 inc rdi
+mov r10,0
+jmp number_mode
+
+early_resolve_op:
+movzx r10, byte[rdi]
+inc rdi
 jmp number_mode
 
 test_op:
@@ -76,9 +103,9 @@ je push_op
 cmp byte [rdi], '+'
 je push_op
 cmp byte [rdi], '*'
-je push_op
+je early_resolve_op
 cmp byte [rdi], '/'
-je push_op
+je early_resolve_op
 
 ; jmp done_reading_input
 
@@ -91,10 +118,10 @@ cmp r8, '+'
 je case_plus
 cmp r8, '-'
 je case_minus
-cmp r8, '*'
-je case_mul
-cmp r8, '/'
-je case_div
+; cmp r8, '*'
+; je case_mul
+; cmp r8, '/'
+; je case_div
 ;terminator case
 jmp return_good
 
@@ -110,20 +137,20 @@ pop r9
 sub r9, rcx
 jmp op_loop
 
-case_mul:
-xor rdx, rdx;prepare for mul call
-pop rax
-imul r9
-mov r9, rax
-jmp op_loop
+; case_mul:
+; xor rdx, rdx;prepare for mul call
+; pop rax
+; imul r9
+; mov r9, rax
+; jmp op_loop
 
 
-case_div:
-xor rdx, rdx;prepare for div call
-pop rax
-idiv r9
-mov r9, rax
-jmp op_loop
+; case_div:
+; xor rdx, rdx;prepare for div call
+; pop rax
+; idiv r9
+; mov r9, rax
+; jmp op_loop
 
 
 return_good:
@@ -132,7 +159,8 @@ mov rax, rdi
 ;jmp wrap_up
 
 wrap_up:
-mov rsp, r10
+mov rsp,rbp
+pop rbp
 ret
 
 exit_error:
